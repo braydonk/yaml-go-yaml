@@ -741,6 +741,11 @@
     data: [0xC2, 0xA0]
 
 - char-predicate:
+    name: Is printable - emoji
+    func: isPrintable
+    data: [0xF0, 0x9F, 0x98, 0x8A]
+
+- char-predicate:
     name: Is printable - null
     func: isPrintable
     data: [0x00]

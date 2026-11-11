@@ -3761,3 +3761,14 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestPrintableFourByteUTF8(t *testing.T) {
+	input := "emoji: 😊\n"
+	var node yaml.Node
+	err := yaml.Load([]byte(input), &node)
+	assert.NoError(t, err)
+
+	out, err := yaml.Dump(&node)
+	assert.NoError(t, err)
+	assert.Equal(t, input, string(out))
+}

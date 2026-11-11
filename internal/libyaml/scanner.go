@@ -617,7 +617,10 @@ func isPrintable(b []byte, i int) bool {
 		(b[i] == 0xEE) ||
 		(b[i] == 0xEF && // #xE000 <= . <= #xFFFD
 			!(b[i+1] == 0xBB && b[i+2] == 0xBF) && // && . != #xFEFF
-			!(b[i+1] == 0xBF && (b[i+2] == 0xBE || b[i+2] == 0xBF))))
+			!(b[i+1] == 0xBF && (b[i+2] == 0xBE || b[i+2] == 0xBF))) ||
+		(b[i] == 0xF0 && b[i+1] >= 0x90) || // #x10000 <= . <= #x10FFFF
+		(b[i] > 0xF0 && b[i] < 0xF4) ||
+		(b[i] == 0xF4 && b[i+1] < 0x90))
 }
 
 // Check if the character at the specified position is NUL.
