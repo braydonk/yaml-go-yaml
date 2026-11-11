@@ -48,6 +48,8 @@ type Options struct {
 	FlowSimpleCollections bool
 	// QuotePreference sets the preferred quote style for strings that require quoting.
 	QuotePreference QuoteStyle
+	// PadLineComments sets the number of spaces used to pad line comments.
+	PadLineComments int
 
 	// Parser supplies complete events in place of native parsing.
 	Parser ParserPlugin
@@ -446,6 +448,22 @@ func WithQuotePreference(style QuoteStyle) Option {
 	}
 }
 
+// WithPadLineComments sets the number of spaces used to pad line comments
+// when dumping YAML content.
+//
+// Valid values are 1 or greater.
+//
+// The default is 1 space.
+func WithPadLineComments(spaces int) Option {
+	return func(o *Options) error {
+		if spaces < 1 {
+			return errors.New("yaml: line comment padding must be at least 1 space")
+		}
+		o.PadLineComments = spaces
+		return nil
+	}
+}
+
 // CombineOptions combines multiple options into a single Option.
 // This is useful for creating option presets or combining version defaults
 // with custom options.
@@ -473,6 +491,7 @@ func ApplyOptions(opts ...Option) (*Options, error) {
 		LineWidth:        80,
 		Unicode:          true,
 		UniqueKeys:       true,
+		PadLineComments:  1,
 
 		// Default safety limits
 		DepthCheck: DefaultDepthCheck,
@@ -493,6 +512,7 @@ var DefaultOptions = &Options{
 	Unicode:         true,
 	UniqueKeys:      true,
 	QuotePreference: QuoteLegacy,
+	PadLineComments: 1,
 
 	// Default safety limits
 	DepthCheck: DefaultDepthCheck,

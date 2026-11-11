@@ -160,3 +160,19 @@ func (d *Dumper) SetLegacyEncoderIndent(spaces int) {
 func (d *Dumper) SetLegacyEncoderCompactSeqIndent(compact bool) {
 	d.serializer.Emitter.CompactSequenceIndent = compact
 }
+
+// SetLegacyEncoderPadLineComments allows changing the line comment padding for
+// the legacy Encoder API.
+//
+// This method is only provided for backward compatibility with the legacy
+// Encoder API. Do not use in libyaml, use [WithPadLineComments] instead.
+func (d *Dumper) SetLegacyEncoderPadLineComments(spaces int) {
+	if spaces < 0 {
+		failDumpf(
+			SerializerStage,
+			d.options.FormatDumpError,
+			"cannot pad line comments to a negative number of spaces",
+		)
+	}
+	d.serializer.Emitter.SetPadLineComments(spaces)
+}

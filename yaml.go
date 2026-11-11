@@ -257,6 +257,14 @@ var (
 	//   - QuoteDouble: Use double quotes
 	//   - QuoteLegacy: Legacy v2/v3 behavior (mixed quoting)
 	WithQuotePreference = libyaml.WithQuotePreference
+
+	// WithPadLineComments sets the number of spaces used to pad line comments
+	// when dumping YAML content.
+	//
+	// Valid values are 1 or greater.
+	//
+	// The default is 1 space.
+	WithPadLineComments = libyaml.WithPadLineComments
 )
 
 // Options combines multiple options into a single Option.
@@ -983,6 +991,12 @@ func (e *Encoder) CompactSeqIndent() {
 // DefaultSeqIndent makes it so that '- ' is not considered part of the indentation.
 func (e *Encoder) DefaultSeqIndent() {
 	e.dumper.SetLegacyEncoderCompactSeqIndent(false)
+}
+
+// SetPadLineComments changes the number of spaces used to pad line comments
+// when encoding.
+func (e *Encoder) SetPadLineComments(spaces int) {
+	e.dumper.SetLegacyEncoderPadLineComments(spaces)
 }
 
 // Close closes the encoder by writing any remaining data.

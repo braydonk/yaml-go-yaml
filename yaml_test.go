@@ -3761,3 +3761,29 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestPadLineComments(t *testing.T) {
+	input := "a: 1 # inline comment\n"
+	want := "a: 1  # inline comment\n"
+
+	var node yaml.Node
+	err := yaml.Load([]byte(input), &node)
+	assert.NoError(t, err)
+
+	out, err := yaml.Dump(&node, yaml.WithPadLineComments(2))
+	assert.NoError(t, err)
+	assert.Equal(t, want, string(out))
+
+	var buf bytes.Buffer
+	enc := yaml.NewEncoder(&buf)
+	enc.SetIndent(2)
+	enc.SetPadLineComments(2)
+	err = enc.Encode(&node)
+	assert.NoError(t, err)
+	err = enc.Close()
+	assert.NoError(t, err)
+	assert.Equal(t, want, buf.String())
+
+	_, err = yaml.Dump(&node, yaml.WithPadLineComments(0))
+	assert.NotNil(t, err)
+}

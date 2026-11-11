@@ -114,6 +114,7 @@ type Emitter struct {
 	// CompactSequenceIndent is true if the '- ' is considered part of the indentation for sequence elements.
 	CompactSequenceIndent bool
 	tabIndent             bool // Use tabs for structural indentation.
+	pad_line_comments     int  // Number of spaces before line comments.
 
 	flow_level int // The current flow level.
 
@@ -182,10 +183,11 @@ type Emitter struct {
 // NewEmitter creates a new emitter object.
 func NewEmitter() Emitter {
 	return Emitter{
-		buffer:     make([]byte, output_buffer_size),
-		states:     make([]EmitterState, 0, initial_stack_size),
-		events:     make([]Event, 0, initial_queue_size),
-		best_width: -1,
+		buffer:            make([]byte, output_buffer_size),
+		states:            make([]EmitterState, 0, initial_stack_size),
+		events:            make([]Event, 0, initial_queue_size),
+		best_width:        -1,
+		pad_line_comments: 1,
 	}
 }
 
@@ -279,6 +281,14 @@ func (emitter *Emitter) SetUnicode(unicode bool) {
 // SetLineBreak sets the preferred line break character.
 func (emitter *Emitter) SetLineBreak(line_break LineBreak) {
 	emitter.line_break = line_break
+}
+
+// SetPadLineComments sets the number of spaces used to pad line comments.
+func (emitter *Emitter) SetPadLineComments(spaces int) {
+	if spaces < 1 {
+		spaces = 1
+	}
+	emitter.pad_line_comments = spaces
 }
 
 // State dispatcher.
@@ -1273,8 +1283,14 @@ func (emitter *Emitter) processLineCommentLinebreak(linebreak bool) error {
 		return nil
 	}
 	if !emitter.whitespace {
-		if err := emitter.put(' '); err != nil {
-			return err
+		pad := emitter.pad_line_comments
+		if pad < 1 {
+			pad = 1
+		}
+		for i := 0; i < pad; i++ {
+			if err := emitter.put(' '); err != nil {
+				return err
+			}
 		}
 	}
 	if err := emitter.writeComment(emitter.LineComment); err != nil {
