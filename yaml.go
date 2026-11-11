@@ -257,6 +257,30 @@ var (
 	//   - QuoteDouble: Use double quotes
 	//   - QuoteLegacy: Legacy v2/v3 behavior (mixed quoting)
 	WithQuotePreference = libyaml.WithQuotePreference
+
+	// WithArrayIndent sets the number of spaces to use for block sequence
+	// indentation when dumping YAML content.
+	//
+	// Valid values are 2-9. When unset (0), block sequences use the general
+	// Indent.
+	WithArrayIndent = libyaml.WithArrayIndent
+
+	// WithIndentRootArray configures whether root-level block sequences are
+	// indented when dumping YAML content.
+	//
+	// When called without arguments, defaults to true.
+	//
+	// The default is false.
+	WithIndentRootArray = libyaml.WithIndentRootArray
+
+	// WithIndentlessBlockSequence configures whether block sequences under
+	// mapping keys are emitted with zero additional indentation before '- ',
+	// regardless of the mapping indentation width.
+	//
+	// When called without arguments, defaults to true.
+	//
+	// The default is false.
+	WithIndentlessBlockSequence = libyaml.WithIndentlessBlockSequence
 )
 
 // Options combines multiple options into a single Option.
@@ -983,6 +1007,23 @@ func (e *Encoder) CompactSeqIndent() {
 // DefaultSeqIndent makes it so that '- ' is not considered part of the indentation.
 func (e *Encoder) DefaultSeqIndent() {
 	e.dumper.SetLegacyEncoderCompactSeqIndent(false)
+}
+
+// SetArrayIndent changes the indentation used for block sequences.
+func (e *Encoder) SetArrayIndent(spaces int) {
+	e.dumper.SetLegacyEncoderArrayIndent(spaces)
+}
+
+// SetIndentRootArray configures whether root-level block sequences are
+// indented.
+func (e *Encoder) SetIndentRootArray(enable bool) {
+	e.dumper.SetLegacyEncoderIndentRootArray(enable)
+}
+
+// SetIndentlessBlockSequence configures whether block sequences under mapping
+// keys are emitted without additional indentation before '- '.
+func (e *Encoder) SetIndentlessBlockSequence(enable bool) {
+	e.dumper.SetLegacyEncoderIndentlessBlockSequence(enable)
 }
 
 // Close closes the encoder by writing any remaining data.

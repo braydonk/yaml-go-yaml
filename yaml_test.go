@@ -3761,3 +3761,49 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestSequenceIndentationOptions(t *testing.T) {
+	t.Run("ArrayIndent distinct from Indent", func(t *testing.T) {
+		input := "a:\n  b:\n    - 1\n    - 2\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+
+		out, err := yaml.Dump(&node,
+			yaml.WithIndent(4),
+			yaml.WithArrayIndent(2),
+			yaml.WithCompactSeqIndent(false),
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "a:\n    b:\n      - 1\n      - 2\n", string(out))
+	})
+
+	t.Run("IndentRootArray", func(t *testing.T) {
+		input := "- a\n- b\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+
+		out, err := yaml.Dump(&node,
+			yaml.WithIndent(2),
+			yaml.WithIndentRootArray(),
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, "  - a\n  - b\n", string(out))
+	})
+
+	t.Run("IndentlessBlockSequence with Indent 4 and nested sequences", func(t *testing.T) {
+		input := "a:\n- b:\n    c: 1\n- - nested1\n  - nested2\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+
+		out, err := yaml.Dump(&node,
+			yaml.WithIndent(4),
+			yaml.WithCompactSeqIndent(false),
+			yaml.WithIndentlessBlockSequence(),
+		)
+		assert.NoError(t, err)
+		assert.Equal(t, input, string(out))
+	})
+}

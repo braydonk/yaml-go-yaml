@@ -47,6 +47,11 @@ func NewSerializer(w io.Writer, opts *Options) *Serializer {
 		indent = 2
 	}
 	emitter.BestIndent = indent
+	if !tabs && opts.ArrayIndent > 0 {
+		emitter.BestArrayIndent = opts.ArrayIndent
+	}
+	emitter.IndentRootArray = opts.IndentRootArray
+	emitter.IndentlessBlockSequence = opts.IndentlessBlockSequence
 
 	if w != nil {
 		emitter.SetOutputWriter(w)

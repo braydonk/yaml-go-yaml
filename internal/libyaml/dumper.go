@@ -160,3 +160,28 @@ func (d *Dumper) SetLegacyEncoderIndent(spaces int) {
 func (d *Dumper) SetLegacyEncoderCompactSeqIndent(compact bool) {
 	d.serializer.Emitter.CompactSequenceIndent = compact
 }
+
+// SetLegacyEncoderArrayIndent allows changing the block sequence indentation
+// for the legacy Encoder API.
+func (d *Dumper) SetLegacyEncoderArrayIndent(spaces int) {
+	if spaces < 0 {
+		failDumpf(
+			SerializerStage,
+			d.options.FormatDumpError,
+			"cannot indent to a negative number of spaces",
+		)
+	}
+	d.serializer.Emitter.BestArrayIndent = spaces
+}
+
+// SetLegacyEncoderIndentRootArray allows changing root sequence indentation
+// for the legacy Encoder API.
+func (d *Dumper) SetLegacyEncoderIndentRootArray(enable bool) {
+	d.serializer.Emitter.IndentRootArray = enable
+}
+
+// SetLegacyEncoderIndentlessBlockSequence allows changing indentless block
+// sequence emission for the legacy Encoder API.
+func (d *Dumper) SetLegacyEncoderIndentlessBlockSequence(enable bool) {
+	d.serializer.Emitter.IndentlessBlockSequence = enable
+}

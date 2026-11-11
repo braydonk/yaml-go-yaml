@@ -94,6 +94,8 @@ type Emitter struct {
 	canonical bool // If the output is in the canonical style?
 	// BestIndent is the number of spaces to use for indentation.
 	BestIndent      int
+	// BestArrayIndent is the number of spaces to use for block sequence indentation.
+	BestArrayIndent int
 	best_width      int        // The preferred width of the output lines.
 	unicode         bool       // Allow unescaped non-ASCII characters?
 	line_break      LineBreak  // The preferred line break.
@@ -112,8 +114,10 @@ type Emitter struct {
 	indent int // The current indentation level.
 
 	// CompactSequenceIndent is true if the '- ' is considered part of the indentation for sequence elements.
-	CompactSequenceIndent bool
-	tabIndent             bool // Use tabs for structural indentation.
+	CompactSequenceIndent   bool
+	IndentRootArray         bool
+	IndentlessBlockSequence bool
+	tabIndent               bool // Use tabs for structural indentation.
 
 	flow_level int // The current flow level.
 
@@ -261,6 +265,25 @@ func (emitter *Emitter) SetIndent(indent int) {
 		indent = 2
 	}
 	emitter.BestIndent = indent
+}
+
+// SetArrayIndent sets the indentation increment for block sequences.
+func (emitter *Emitter) SetArrayIndent(indent int) {
+	if indent < 2 || indent > 9 {
+		indent = 2
+	}
+	emitter.BestArrayIndent = indent
+}
+
+// SetIndentRootArray sets whether root-level block sequences are indented.
+func (emitter *Emitter) SetIndentRootArray(enable bool) {
+	emitter.IndentRootArray = enable
+}
+
+// SetIndentlessBlockSequence sets whether block sequences are emitted without
+// extra indentation before '- '.
+func (emitter *Emitter) SetIndentlessBlockSequence(enable bool) {
+	emitter.IndentlessBlockSequence = enable
 }
 
 // SetWidth sets the preferred line width.
@@ -830,7 +853,7 @@ func (emitter *Emitter) emitBlockSequenceItem(event *Event, first bool) error {
 		// of the indentation for sequence elements.
 		seq := emitter.mapping_context && (emitter.column == 0 || !emitter.indention) &&
 			emitter.CompactSequenceIndent
-		if err := emitter.increaseIndentCompact(false, false, seq); err != nil {
+		if err := emitter.increaseIndentCompact(false, emitter.IndentlessBlockSequence, seq); err != nil {
 			return err
 		}
 	}
@@ -2441,9 +2464,15 @@ func (emitter *Emitter) appendTagDirective(value *TagDirective, allow_duplicates
 // Increase the indentation level.
 func (emitter *Emitter) increaseIndentCompact(flow, indentless bool, compact_seq bool) error {
 	emitter.indents = append(emitter.indents, emitter.indent)
+	array_indent := emitter.BestArrayIndent
+	if array_indent < 2 || array_indent > 9 {
+		array_indent = emitter.BestIndent
+	}
 	if emitter.indent < 0 {
 		if flow {
 			emitter.indent = emitter.BestIndent
+		} else if emitter.IndentRootArray && emitter.state == EMIT_BLOCK_SEQUENCE_FIRST_ITEM_STATE {
+			emitter.indent = array_indent
 		} else {
 			emitter.indent = 0
 		}
@@ -2453,22 +2482,20 @@ func (emitter *Emitter) increaseIndentCompact(flow, indentless bool, compact_seq
 			// The first indent inside a sequence will just skip
 			// the "- " indicator.
 			emitter.indent += 2
+		} else if emitter.state == EMIT_BLOCK_SEQUENCE_FIRST_ITEM_STATE {
+			emitter.indent = array_indent *
+				((emitter.indent + array_indent) / array_indent)
+			if compact_seq {
+				emitter.indent = emitter.indent - 2
+			}
 		} else {
 			// Everything else aligns to the chosen indentation.
 			emitter.indent = emitter.BestIndent *
 				((emitter.indent + emitter.BestIndent) / emitter.BestIndent)
-			if compact_seq {
-				// The value compact_seq passed in is almost
-				// always set to `false` when this function is
-				// called, except when we are dealing with
-				// sequence nodes. So this gets triggered to
-				// subtract 2 only when we are increasing the
-				// indent to account for sequence nodes, which
-				// will be correct because we need to subtract
-				// 2 to account for the - at the beginning of
-				// the sequence node.
-				emitter.indent = emitter.indent - 2
-			}
+		}
+	} else {
+		if emitter.states[len(emitter.states)-1] == EMIT_BLOCK_SEQUENCE_ITEM_STATE {
+			emitter.indent += 2
 		}
 	}
 	return nil

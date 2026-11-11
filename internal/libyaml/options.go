@@ -32,6 +32,13 @@ type Options struct {
 	Indent int
 	// CompactSeqIndent controls whether the sequence indicator '- ' is considered part of the indentation.
 	CompactSeqIndent bool
+	// ArrayIndent sets the number of spaces to use for block sequence indentation (2-9).
+	ArrayIndent int
+	// IndentRootArray controls whether root-level block sequences are indented.
+	IndentRootArray bool
+	// IndentlessBlockSequence controls whether block sequences under mapping keys
+	// are emitted with zero additional indentation before '- '.
+	IndentlessBlockSequence bool
 	// LineWidth sets the preferred line width for YAML output (-1 for unlimited).
 	LineWidth int
 	// Unicode controls whether non-ASCII characters are allowed in YAML output.
@@ -443,6 +450,59 @@ func WithQuotePreference(style QuoteStyle) Option {
 		default:
 			return fmt.Errorf("invalid QuoteStyle value: %d", style)
 		}
+	}
+}
+
+// WithArrayIndent sets the number of spaces to use for block sequence
+// indentation when dumping YAML content.
+//
+// Valid values are 2-9. When unset (0), block sequences use the general Indent.
+func WithArrayIndent(indent int) Option {
+	return func(o *Options) error {
+		if indent < 2 || indent > 9 {
+			return errors.New("yaml: array indent must be between 2 and 9 spaces")
+		}
+		o.ArrayIndent = indent
+		return nil
+	}
+}
+
+// WithIndentRootArray configures whether root-level block sequences are
+// indented when dumping YAML content.
+//
+// When called without arguments, defaults to true.
+//
+// The default is false.
+func WithIndentRootArray(enable ...bool) Option {
+	if len(enable) > 1 {
+		return func(o *Options) error {
+			return errors.New("yaml: WithIndentRootArray accepts at most one argument")
+		}
+	}
+	val := len(enable) == 0 || enable[0]
+	return func(o *Options) error {
+		o.IndentRootArray = val
+		return nil
+	}
+}
+
+// WithIndentlessBlockSequence configures whether block sequences under mapping
+// keys are emitted with zero additional indentation before '- ', regardless of
+// the mapping indentation width.
+//
+// When called without arguments, defaults to true.
+//
+// The default is false.
+func WithIndentlessBlockSequence(enable ...bool) Option {
+	if len(enable) > 1 {
+		return func(o *Options) error {
+			return errors.New("yaml: WithIndentlessBlockSequence accepts at most one argument")
+		}
+	}
+	val := len(enable) == 0 || enable[0]
+	return func(o *Options) error {
+		o.IndentlessBlockSequence = val
+		return nil
 	}
 }
 
