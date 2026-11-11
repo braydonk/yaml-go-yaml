@@ -510,6 +510,16 @@ func (emitter *Emitter) emitDocumentStart(event *Event, first bool) error {
 		if emitter.checkEmptyDocument() {
 			implicit = false
 		}
+		if len(emitter.HeadComment) > 0 {
+			if err := emitter.processHeadComment(); err != nil {
+				return err
+			}
+			if implicit {
+				if err := emitter.putLineBreak(); err != nil {
+					return err
+				}
+			}
+		}
 		if !implicit {
 			if err := emitter.writeIndent(); err != nil {
 				return err
@@ -521,15 +531,6 @@ func (emitter *Emitter) emitDocumentStart(event *Event, first bool) error {
 				if err := emitter.writeIndent(); err != nil {
 					return err
 				}
-			}
-		}
-
-		if len(emitter.HeadComment) > 0 {
-			if err := emitter.processHeadComment(); err != nil {
-				return err
-			}
-			if err := emitter.putLineBreak(); err != nil {
-				return err
 			}
 		}
 

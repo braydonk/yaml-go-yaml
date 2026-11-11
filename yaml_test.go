@@ -3761,3 +3761,17 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestDocumentStartHeadComments(t *testing.T) {
+	input := "# document header\n---\n# key comment\na: 1\n"
+
+	var node yaml.Node
+	err := yaml.Load([]byte(input), &node)
+	assert.NoError(t, err)
+	assert.Equal(t, "# document header", node.HeadComment)
+	assert.Equal(t, "# key comment", node.Content[0].Content[0].HeadComment)
+
+	out, err := yaml.Dump(&node, yaml.WithExplicitStart())
+	assert.NoError(t, err)
+	assert.Equal(t, input, string(out))
+}

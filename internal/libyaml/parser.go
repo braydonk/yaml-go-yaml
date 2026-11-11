@@ -621,7 +621,9 @@ func (parser *Parser) parseDocumentStart(event *Event, implicit bool) error {
 			versionDirective: version_directive,
 			tagDirectives:    tag_directives,
 			Implicit:         false,
+			HeadComment:      parser.HeadComment,
 		}
+		parser.HeadComment = nil
 		parser.skipToken()
 
 	} else {
