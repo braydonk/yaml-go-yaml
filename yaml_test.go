@@ -3761,3 +3761,27 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestCRLFCommentScanning(t *testing.T) {
+	t.Run("single head comment with CRLF", func(t *testing.T) {
+		input := "# comment\r\na: 1\r\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+
+		out, err := yaml.Dump(&node)
+		assert.NoError(t, err)
+		assert.Equal(t, "# comment\na: 1\n", string(out))
+	})
+
+	t.Run("consecutive and blank-line separated comments with CRLF", func(t *testing.T) {
+		input := "# line 1\r\n# line 2\r\n\r\n# after blank\r\na: 1\r\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+
+		out, err := yaml.Dump(&node)
+		assert.NoError(t, err)
+		assert.Equal(t, "# line 1\n# line 2\n\n# after blank\na: 1\n", string(out))
+	})
+}

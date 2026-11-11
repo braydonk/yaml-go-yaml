@@ -1973,8 +1973,8 @@ func (parser *Parser) scanComments(scan_mark Mark) error {
 
 	peek := 0
 	for ; peek < 512; peek++ {
-		if parser.unread < peek+1 {
-			if parser.updateBuffer(peek+1) != nil {
+		if parser.unread < peek+2 {
+			if parser.updateBuffer(peek+2) != nil && parser.unread < peek+1 {
 				break
 			}
 		}
@@ -2017,6 +2017,9 @@ func (parser *Parser) scanComments(scan_mark Mark) error {
 			}
 			if !isLineBreak(parser.buffer, parser.buffer_pos+peek) {
 				break
+			}
+			if isCRLF(parser.buffer, parser.buffer_pos+peek) {
+				peek++
 			}
 			first_empty = false
 			recent_empty = true
@@ -2078,6 +2081,12 @@ func (parser *Parser) scanComments(scan_mark Mark) error {
 		}
 
 		peek = 0
+		if parser.unread < 2 {
+			_ = parser.updateBuffer(2)
+		}
+		if isCRLF(parser.buffer, parser.buffer_pos) {
+			peek = 1
+		}
 		column = 1
 		line = parser.mark.Line
 		next_indent = parser.indent
