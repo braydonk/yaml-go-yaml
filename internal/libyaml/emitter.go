@@ -1637,12 +1637,17 @@ func (emitter *Emitter) selectScalarStyle(event *Event) error {
 	}
 
 	if style == PLAIN_SCALAR_STYLE {
-		if emitter.flow_level > 0 && !emitter.scalar_data.flow_plain_allowed ||
-			emitter.flow_level == 0 && !emitter.scalar_data.block_plain_allowed {
+		flow_mapping_empty_value := len(emitter.scalar_data.value) == 0 &&
+			emitter.mapping_context && !emitter.simple_key_context &&
+			event.Implicit
+		if (emitter.flow_level > 0 && !emitter.scalar_data.flow_plain_allowed ||
+			emitter.flow_level == 0 && !emitter.scalar_data.block_plain_allowed) &&
+			!flow_mapping_empty_value {
 			style = emitter.requiredQuoteStyle()
 		}
 		if len(emitter.scalar_data.value) == 0 &&
-			(emitter.flow_level > 0 || emitter.simple_key_context) {
+			(emitter.flow_level > 0 || emitter.simple_key_context) &&
+			!flow_mapping_empty_value {
 			style = emitter.requiredQuoteStyle()
 		}
 		if no_tag && !event.Implicit {

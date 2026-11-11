@@ -3761,3 +3761,34 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestFlowMappingImplicitNull(t *testing.T) {
+	t.Run("implicit null in flow mapping stays null", func(t *testing.T) {
+		input := "{a: , b: 1}\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+		assert.Equal(t, "!!null", node.Content[0].Content[1].Tag)
+
+		out, err := yaml.Dump(&node)
+		assert.NoError(t, err)
+		assert.Equal(t, "{a:, b: 1}\n", string(out))
+
+		var roundtrip yaml.Node
+		err = yaml.Load(out, &roundtrip)
+		assert.NoError(t, err)
+		assert.Equal(t, "!!null", roundtrip.Content[0].Content[1].Tag)
+	})
+
+	t.Run("quoted empty string in flow mapping stays string", func(t *testing.T) {
+		input := "{a: ''}\n"
+		var node yaml.Node
+		err := yaml.Load([]byte(input), &node)
+		assert.NoError(t, err)
+		assert.Equal(t, "!!str", node.Content[0].Content[1].Tag)
+
+		out, err := yaml.Dump(&node)
+		assert.NoError(t, err)
+		assert.Equal(t, "{a: ''}\n", string(out))
+	})
+}
