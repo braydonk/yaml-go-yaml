@@ -268,6 +268,15 @@ func (l *Loader) SetLegacyLoaderKnownFields(enable bool) {
 	l.constructor.KnownFields = enable
 }
 
+// SetLegacyLoaderScanFoldedAsLiteral allows changing the folded block scalar
+// scanning behavior from the legacy Decoder API.
+//
+// This method is only provided for backward compatibility with the legacy
+// Decoder API. Do not use in libyaml, use [WithScanFoldedAsLiteral] instead.
+func (l *Loader) SetLegacyLoaderScanFoldedAsLiteral(enable bool) {
+	l.composer.Parser.SetScanFoldedAsLiteral(enable)
+}
+
 // LoadAny parses YAML data into generic Go structures (map[string]any, []any).
 //
 // Useful for test data loading where the structure is unknown at compile time.

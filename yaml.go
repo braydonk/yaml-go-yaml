@@ -257,6 +257,24 @@ var (
 	//   - QuoteDouble: Use double quotes
 	//   - QuoteLegacy: Legacy v2/v3 behavior (mixed quoting)
 	WithQuotePreference = libyaml.WithQuotePreference
+
+	// WithScanFoldedAsLiteral configures whether folded block scalars (>) are
+	// scanned as literal scalars so their line breaks are preserved in Node
+	// values.
+	//
+	// When called without arguments, defaults to true.
+	//
+	// The default is false.
+	WithScanFoldedAsLiteral = libyaml.WithScanFoldedAsLiteral
+
+	// WithAssumeFoldedAsLiteral configures whether the emitter assumes folded
+	// block scalar (>) values already contain their intended line breaks and
+	// omits inserting extra empty lines between lines.
+	//
+	// When called without arguments, defaults to true.
+	//
+	// The default is false.
+	WithAssumeFoldedAsLiteral = libyaml.WithAssumeFoldedAsLiteral
 )
 
 // Options combines multiple options into a single Option.
@@ -929,6 +947,12 @@ func (dec *Decoder) KnownFields(enable bool) {
 	dec.loader.SetLegacyLoaderKnownFields(enable)
 }
 
+// SetScanBlockScalarAsLiteral configures whether folded block scalars (>) are
+// scanned as literal scalars so their line breaks are preserved.
+func (dec *Decoder) SetScanBlockScalarAsLiteral(enable bool) {
+	dec.loader.SetLegacyLoaderScanFoldedAsLiteral(enable)
+}
+
 // Decode reads the next YAML-encoded value from its input
 // and stores it in the value pointed to by v.
 //
@@ -983,6 +1007,12 @@ func (e *Encoder) CompactSeqIndent() {
 // DefaultSeqIndent makes it so that '- ' is not considered part of the indentation.
 func (e *Encoder) DefaultSeqIndent() {
 	e.dumper.SetLegacyEncoderCompactSeqIndent(false)
+}
+
+// SetAssumeBlockAsLiteral configures whether folded block scalars (>) are
+// emitted without inserting extra empty lines between lines.
+func (e *Encoder) SetAssumeBlockAsLiteral(enable bool) {
+	e.dumper.SetLegacyEncoderAssumeFoldedAsLiteral(enable)
 }
 
 // Close closes the encoder by writing any remaining data.

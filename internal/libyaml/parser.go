@@ -247,7 +247,8 @@ type Parser struct {
 	comments      []Comment // The folded comments for all parsed tokens
 	comments_head int
 
-	skip_comments bool // Skip comment scanning for performance
+	skip_comments          bool // Skip comment scanning for performance
+	scan_folded_as_literal bool // Scan folded block scalars as literal
 
 	// Scanner stuff
 
@@ -428,6 +429,12 @@ func (parser *Parser) GetCommentsHead() int {
 // When enabled, the scanner skips comment tokens for better performance.
 func (parser *Parser) SetSkipComments(skip bool) {
 	parser.skip_comments = skip
+}
+
+// SetScanFoldedAsLiteral enables or disables scanning folded block scalars as
+// literal scalars.
+func (parser *Parser) SetScanFoldedAsLiteral(enable bool) {
+	parser.scan_folded_as_literal = enable
 }
 
 // default_tag_directives defines the standard tag directives (! and !!)

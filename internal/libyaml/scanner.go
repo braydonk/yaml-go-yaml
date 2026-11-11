@@ -1760,6 +1760,7 @@ func (parser *Parser) scanBlockScalar(token *Token, literal bool) error {
 			return err
 		}
 	}
+	scan_as_literal := literal || parser.scan_folded_as_literal
 	var leading_blank, trailing_blank bool
 	for parser.mark.Column == indent && !isZeroChar(parser.buffer, parser.buffer_pos) {
 		// We are at the beginning of a non-empty line.
@@ -1768,7 +1769,7 @@ func (parser *Parser) scanBlockScalar(token *Token, literal bool) error {
 		trailing_blank = isBlank(parser.buffer, parser.buffer_pos)
 
 		// Check if we need to fold the leading line break.
-		if !literal && !leading_blank && !trailing_blank && len(leading_break) > 0 && leading_break[0] == '\n' {
+		if !scan_as_literal && !leading_blank && !trailing_blank && len(leading_break) > 0 && leading_break[0] == '\n' {
 			// Do we need to join the lines by space?
 			if len(trailing_breaks) == 0 {
 				s = append(s, ' ')

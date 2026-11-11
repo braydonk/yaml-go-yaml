@@ -3761,3 +3761,31 @@ func runParserEventsTest(t *testing.T, tc map[string]any) {
 
 	assert.Equal(t, want, events)
 }
+
+func TestPreserveFoldedScalarLineBreaks(t *testing.T) {
+	input := "a: >\n  line1\n  line2\n\n  line3\n"
+
+	var node yaml.Node
+	err := yaml.Load([]byte(input), &node, yaml.WithScanFoldedAsLiteral())
+	assert.NoError(t, err)
+
+	out, err := yaml.Dump(&node, yaml.WithAssumeFoldedAsLiteral())
+	assert.NoError(t, err)
+	assert.Equal(t, input, string(out))
+
+	var decNode yaml.Node
+	dec := yaml.NewDecoder(strings.NewReader(input))
+	dec.SetScanBlockScalarAsLiteral(true)
+	err = dec.Decode(&decNode)
+	assert.NoError(t, err)
+
+	var buf bytes.Buffer
+	enc := yaml.NewEncoder(&buf)
+	enc.SetIndent(2)
+	enc.SetAssumeBlockAsLiteral(true)
+	err = enc.Encode(&decNode)
+	assert.NoError(t, err)
+	err = enc.Close()
+	assert.NoError(t, err)
+	assert.Equal(t, input, buf.String())
+}

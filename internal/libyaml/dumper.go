@@ -160,3 +160,12 @@ func (d *Dumper) SetLegacyEncoderIndent(spaces int) {
 func (d *Dumper) SetLegacyEncoderCompactSeqIndent(compact bool) {
 	d.serializer.Emitter.CompactSequenceIndent = compact
 }
+
+// SetLegacyEncoderAssumeFoldedAsLiteral allows changing the folded block
+// scalar emission behavior for the legacy Encoder API.
+//
+// This method is only provided for backward compatibility with the legacy
+// Encoder API. Do not use in libyaml, use [WithAssumeFoldedAsLiteral] instead.
+func (d *Dumper) SetLegacyEncoderAssumeFoldedAsLiteral(enable bool) {
+	d.serializer.Emitter.SetAssumeFoldedAsLiteral(enable)
+}

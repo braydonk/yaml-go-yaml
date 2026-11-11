@@ -112,8 +112,9 @@ type Emitter struct {
 	indent int // The current indentation level.
 
 	// CompactSequenceIndent is true if the '- ' is considered part of the indentation for sequence elements.
-	CompactSequenceIndent bool
-	tabIndent             bool // Use tabs for structural indentation.
+	CompactSequenceIndent   bool
+	tabIndent               bool // Use tabs for structural indentation.
+	assume_folded_as_literal bool // Emit folded scalars without extra line breaks.
 
 	flow_level int // The current flow level.
 
@@ -279,6 +280,12 @@ func (emitter *Emitter) SetUnicode(unicode bool) {
 // SetLineBreak sets the preferred line break character.
 func (emitter *Emitter) SetLineBreak(line_break LineBreak) {
 	emitter.line_break = line_break
+}
+
+// SetAssumeFoldedAsLiteral sets whether folded scalars are emitted without
+// extra empty lines between lines.
+func (emitter *Emitter) SetAssumeFoldedAsLiteral(enable bool) {
+	emitter.assume_folded_as_literal = enable
 }
 
 // State dispatcher.
@@ -2214,7 +2221,7 @@ func (emitter *Emitter) writeFoldedScalar(value []byte) error {
 				for k < len(value) && isLineBreak(value, k) {
 					k += width(value[k])
 				}
-				if k < len(value) && !isBlankOrZero(value, k) {
+				if !emitter.assume_folded_as_literal && k < len(value) && !isBlankOrZero(value, k) {
 					if err := emitter.putLineBreak(); err != nil {
 						return err
 					}

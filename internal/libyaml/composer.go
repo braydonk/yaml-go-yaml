@@ -64,6 +64,7 @@ func (c *Composer) configureInput(r io.Reader) {
 		c.Parser.depthCheck = c.opts.DepthCheck
 		c.Parser.formatError = c.opts.FormatLoadError
 		c.Parser.indentConfig = c.opts.IndentConfig
+		c.Parser.SetScanFoldedAsLiteral(c.opts.ScanFoldedAsLiteral)
 	}
 }
 

@@ -26,6 +26,9 @@ type Options struct {
 	StreamNodes bool
 	// AllDocuments enables multi-document mode for [Load] and [Dump] operations.
 	AllDocuments bool
+	// ScanFoldedAsLiteral scans folded block scalars (>) as literal scalars
+	// so their line breaks are preserved in Node values.
+	ScanFoldedAsLiteral bool
 
 	// Dumping options
 	// Indent sets the number of spaces to use for indentation when dumping YAML content (2-9).
@@ -48,6 +51,9 @@ type Options struct {
 	FlowSimpleCollections bool
 	// QuotePreference sets the preferred quote style for strings that require quoting.
 	QuotePreference QuoteStyle
+	// AssumeFoldedAsLiteral emits folded block scalars (>) without inserting
+	// extra empty lines between lines.
+	AssumeFoldedAsLiteral bool
 
 	// Parser supplies complete events in place of native parsing.
 	Parser ParserPlugin
@@ -443,6 +449,46 @@ func WithQuotePreference(style QuoteStyle) Option {
 		default:
 			return fmt.Errorf("invalid QuoteStyle value: %d", style)
 		}
+	}
+}
+
+// WithScanFoldedAsLiteral configures whether folded block scalars (>) are
+// scanned as literal scalars so their line breaks are preserved in Node
+// values.
+//
+// When called without arguments, defaults to true.
+//
+// The default is false.
+func WithScanFoldedAsLiteral(enable ...bool) Option {
+	if len(enable) > 1 {
+		return func(o *Options) error {
+			return errors.New("yaml: WithScanFoldedAsLiteral accepts at most one argument")
+		}
+	}
+	val := len(enable) == 0 || enable[0]
+	return func(o *Options) error {
+		o.ScanFoldedAsLiteral = val
+		return nil
+	}
+}
+
+// WithAssumeFoldedAsLiteral configures whether the emitter assumes folded
+// block scalar (>) values already contain their intended line breaks and
+// omits inserting extra empty lines between lines.
+//
+// When called without arguments, defaults to true.
+//
+// The default is false.
+func WithAssumeFoldedAsLiteral(enable ...bool) Option {
+	if len(enable) > 1 {
+		return func(o *Options) error {
+			return errors.New("yaml: WithAssumeFoldedAsLiteral accepts at most one argument")
+		}
+	}
+	val := len(enable) == 0 || enable[0]
+	return func(o *Options) error {
+		o.AssumeFoldedAsLiteral = val
+		return nil
 	}
 }
 

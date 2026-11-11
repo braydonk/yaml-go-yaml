@@ -39,6 +39,7 @@ func NewSerializer(w io.Writer, opts *Options) *Serializer {
 	emitter.SetUnicode(opts.Unicode)
 	emitter.SetCanonical(opts.Canonical)
 	emitter.SetLineBreak(opts.LineBreak)
+	emitter.SetAssumeFoldedAsLiteral(opts.AssumeFoldedAsLiteral)
 	emitter.tabIndent = tabs
 
 	// Set indentation (defaults to 2 if not specified)
